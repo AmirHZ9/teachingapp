@@ -39,6 +39,10 @@ app.innerHTML = `
           <button class="original-button" type="button">${icon.expand}<span>مشاهده در اندازه اصلی</span></button>
         </div>
         <p class="gallery-note">برای دیدن جزئیات، روی تصویر بزنید.</p>
+        <div class="preview-heading"><span>مرور هر سه طرح</span><span>برای انتخاب، روی هر نما بزنید</span></div>
+        <div class="preview-grid" aria-label="پیش‌نمایش سه طرح">
+          ${designs.map((item, i) => `<button class="preview-card ${i === 0 ? 'selected' : ''}" type="button" data-index="${i}" aria-label="نمایش ${item.title}" aria-current="${i === 0 ? 'true' : 'false'}"><img src="${item.src}" alt="پیش‌نمایش ${item.title}" width="941" height="1672" loading="lazy" /><span><small>۰${i + 1}</small>${item.title}</span></button>`).join('')}
+        </div>
       </div>
     </section>
     <section class="closing wrap"><span class="closing-symbol" aria-hidden="true">✳</span><p>هر قدم کوچک، بخشی از مسیر است.</p></section>
@@ -51,6 +55,7 @@ app.innerHTML = `
   </div>`;
 
 const tabs = [...document.querySelectorAll('.tab')];
+const previewCards = [...document.querySelectorAll('.preview-card')];
 const panel = document.querySelector('#design-panel');
 const image = document.querySelector('#design-image');
 const lightbox = document.querySelector('#lightbox');
@@ -74,6 +79,10 @@ function selectDesign(index, focus = false) {
       tab.tabIndex = i === index ? 0 : -1;
     });
     if (focus) tabs[index].focus();
+    previewCards.forEach((card, i) => {
+      card.classList.toggle('selected', i === index);
+      card.setAttribute('aria-current', String(i === index));
+    });
     panel.setAttribute('aria-labelledby', `tab-${item.id}`);
     document.querySelector('#design-eyebrow').textContent = item.eyebrow;
     document.querySelector('#design-title').textContent = item.title;
@@ -84,6 +93,11 @@ function selectDesign(index, focus = false) {
     requestAnimationFrame(() => panel.classList.remove('changing'));
   }, reducedMotion.matches ? 0 : 130);
 }
+
+previewCards.forEach((card, index) => card.addEventListener('click', () => {
+  selectDesign(index);
+  if (window.matchMedia('(max-width: 640px)').matches) panel.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'start' });
+}));
 
 tabs.forEach((tab, index) => {
   tab.addEventListener('click', () => selectDesign(index));
